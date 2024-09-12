@@ -18,6 +18,9 @@
  *
  *  Created on: Jul 29, 2013
  *      Author: Karl Schwabe
+ *
+ *  Modified: 2024
+ *    Author: Felix Alhaus
  */
 
 /** \file pose_estimator.h
@@ -29,16 +32,17 @@
 #define POSEESTIMATOR_H_
 
 #include <Eigen/Dense>
-#include <Eigen/Geometry>
-#include <math.h>
-#include <vector>
-#include "monocular_pose_estimator_lib/datatypes.h"
-#include "monocular_pose_estimator_lib/led_detector.h"
-#include "monocular_pose_estimator_lib/visualization.h"
-#include "monocular_pose_estimator_lib/combinations.h"
-#include "monocular_pose_estimator_lib/p3p.h"
-#include <iostream>
-#include <opencv2/opencv.hpp>
+//#include <Eigen/Geometry>
+//#include <math.h>
+//#include <vector>
+//#include "monocular_pose_estimator_lib/datatypes.h"
+//#include "monocular_pose_estimator_lib/led_detector.h"
+//#include "monocular_pose_estimator_lib/visualization.h"
+//#include "monocular_pose_estimator_lib/combinations.h"
+//#include "monocular_pose_estimator_lib/p3p.h"
+//#include <iostream>
+//#include <opencv2/opencv.hpp>
+
 
 namespace monocular_pose_estimator
 {
@@ -53,42 +57,45 @@ class PoseEstimator
 {
 
 private:
-  Eigen::Matrix4d current_pose_; //!< Homogeneous transformation matrix for storing the current pose of the tracked object
-  Eigen::Matrix4d previous_pose_; //!< Homogeneous transformation matrix for storing the previously estimated pose of the tracked object
+
+  // Eigen::Matrix4d current_pose_; //!< Homogeneous transformation matrix for storing the current pose of the tracked object
+  // Eigen::Matrix4d previous_pose_; //!< Homogeneous transformation matrix for storing the previously estimated pose of the tracked object
   Eigen::Matrix4d predicted_pose_; //!< Homogeneous transformation matrix for storing the predicted pose of the object. \see predictPose
-  Matrix6d pose_covariance_; //!< A 6x6 covariance matrix that stores the covariance of the calculated pose
-  double current_time_; //!< Stores the time of the current pose
-  double previous_time_; //!< Stores the time of the previous pose
-  double predicted_time_; //!< Stores the time of the predicted pose
-  List4DPoints object_points_; //!< Stores the positions of the makers/LEDs on the object being tracked in the object-fixed coordinate frame using homogeneous coordinates. It is a vector of 4D points.
-  List2DPoints image_points_; //!< Stores the positions of the detected marker points found in the image. It is a vector of 2D points.
-  List2DPoints predicted_pixel_positions_; //!< Stores the predicted pixel positions of the markers in the image. \see predictMarkerPositionsInImage
-  List3DPoints image_vectors_; //!< Stores the unit vectors leading from the camera centre of projection out to the world points/marker points - these are used in the P3P algorithm. \see setImagePoints, calculateImageVectors
-  VectorXuPairs correspondences_; //!< Stores the correspondences of the LED markers and the detected markers in the image
-  double back_projection_pixel_tolerance_; //!< Stores the pixel tolerance that determines whether a back projection is valid or not. \see checkCorrespondences, initialise
-  double nearest_neighbour_pixel_tolerance_; //!< Stores the pixel tolerance that determines the correspondences between the LEDs and the detections in the image when predicting the position of the LEDs in the image. \see findCorrespondences
-  double certainty_threshold_; //!< Stores the ratio of how many of the back-projected points must be within the #back_projection_pixel_tolerance_ for a correspondence between the LEDs and the detections to be correct.
-  double valid_correspondence_threshold_; //!< Stores the ratio of how many correspondences must be considered to be correct for the total correspondences to be considered correct. \see checkCorrespondences, initialise
-  unsigned histogram_threshold_; //!< Stores the minimum numbers of entries in the initialisation histogram before an entry could be used to determine a correspondence between the LEDs and the image detections. \see correspondencesFromHistogram
+  Eigen::Matrix<double, 6, 6> pose_covariance_; //!< A 6x6 covariance matrix that stores the covariance of the calculated pose
+  // double current_time_; //!< Stores the time of the current pose
+  // double previous_time_; //!< Stores the time of the previous pose
+  // double predicted_time_; //!< Stores the time of the predicted pose
+  Eigen::Matrix<Eigen::Vector4d, Eigen::Dynamic, 1> object_points_; //!< Stores the positions of the makers/LEDs on the object being tracked in the object-fixed coordinate frame using homogeneous coordinates. It is a vector of 4D points.
+  Eigen::Matrix<Eigen::Vector2d, Eigen::Dynamic, 1> image_points_; //!< Stores the positions of the detected marker points found in the image. It is a vector of 2D points.
+  // List2DPoints predicted_pixel_positions_; //!< Stores the predicted pixel positions of the markers in the image. \see predictMarkerPositionsInImage
+  Eigen::Matrix<Eigen::Vector3d, Eigen::Dynamic, 1> image_vectors_; //!< Stores the unit vectors leading from the camera centre of projection out to the world points/marker points - these are used in the P3P algorithm. \see setImagePoints, calculateImageVectors
+  Eigen::Matrix<unsigned, Eigen::Dynamic, 2> correspondences_; //!< Stores the correspondences of the LED markers and the detected markers in the image
+  //double back_projection_pixel_tolerance_; //!< Stores the pixel tolerance that determines whether a back projection is valid or not. \see checkCorrespondences, initialise
+  // double nearest_neighbour_pixel_tolerance_; //!< Stores the pixel tolerance that determines the correspondences between the LEDs and the detections in the image when predicting the position of the LEDs in the image. \see findCorrespondences
+  // double certainty_threshold_; //!< Stores the ratio of how many of the back-projected points must be within the #back_projection_pixel_tolerance_ for a correspondence between the LEDs and the detections to be correct.
+  // double valid_correspondence_threshold_; //!< Stores the ratio of how many correspondences must be considered to be correct for the total correspondences to be considered correct. \see checkCorrespondences, initialise
+  // unsigned histogram_threshold_; //!< Stores the minimum numbers of entries in the initialisation histogram before an entry could be used to determine a correspondence between the LEDs and the image detections. \see correspondencesFromHistogram
 
-  std::vector<cv::Point2f> distorted_detection_centers_;
+  // std::vector<cv::Point2f> distorted_detection_centers_;
 
-  unsigned it_since_initialized_; //!< Counter to determine whether the system has been initialised already
-  cv::Rect region_of_interest_; //!< OpenCV rectangle that defines the region of interest to be processd to find the LEDs in the image
-  static const unsigned min_num_leds_detected_ = 4; //!< Minimum number of LEDs that need to be detected for a pose to be calculated
-  bool pose_updated_;
+  // unsigned it_since_initialized_; //!< Counter to determine whether the system has been initialised already
+  // cv::Rect region_of_interest_; //!< OpenCV rectangle that defines the region of interest to be processd to find the LEDs in the image
+  // static const unsigned min_num_leds_detected_ = 4; //!< Minimum number of LEDs that need to be detected for a pose to be calculated
+  // bool pose_updated_;
+
 
 public:
-  cv::Mat camera_matrix_K_; //!< Variable to store the camera matrix as an OpenCV matrix
-  std::vector<double> camera_distortion_coeffs_; //!< Variable to store the camera distortion parameters
 
-  int detection_threshold_value_; //!< The current threshold value for the image for LED detection
-  double gaussian_sigma_; //!< The current standard deviation of the Gaussian that will be applied to the thresholded image for LED detection
-  double min_blob_area_; //!< The the minimum blob area (in pixels squared) that will be detected as a blob/LED. Areas having an area smaller than this will not be detected as LEDs.
-  double max_blob_area_; //!< The the maximum blob area (in pixels squared) that will be detected as a blob/LED. Areas having an area larger than this will not be detected as LEDs.
-  double max_width_height_distortion_; //!< This is a parameter related to the circular distortion of the detected blobs. It is the maximum allowable distortion of a bounding box around the detected blob calculated as the ratio of the width to the height of the bounding rectangle. Ideally the ratio of the width to the height of the bounding rectangle should be 1.
-  double max_circular_distortion_; //!< This is a parameter related to the circular distortion of the detected blobs. It is the maximum allowable distortion of a bounding box around the detected blob, calculated as the area of the blob divided by pi times half the height or half the width of the bounding rectangle.
-  unsigned roi_border_thickness_; //!< This is the thickness of the boarder (in pixels) around the predicted area of the LEDs in the image that defines the region of interest for image processing and detection of the LEDs.
+  Eigen::Matrix3d camera_matrix_K_; //!< Variable to store the camera matrix as an OpenCV matrix
+  // std::vector<double> camera_distortion_coeffs_; //!< Variable to store the camera distortion parameters
+
+  // int detection_threshold_value_; //!< The current threshold value for the image for LED detection
+  // double gaussian_sigma_; //!< The current standard deviation of the Gaussian that will be applied to the thresholded image for LED detection
+  // double min_blob_area_; //!< The the minimum blob area (in pixels squared) that will be detected as a blob/LED. Areas having an area smaller than this will not be detected as LEDs.
+  // double max_blob_area_; //!< The the maximum blob area (in pixels squared) that will be detected as a blob/LED. Areas having an area larger than this will not be detected as LEDs.
+  // double max_width_height_distortion_; //!< This is a parameter related to the circular distortion of the detected blobs. It is the maximum allowable distortion of a bounding box around the detected blob calculated as the ratio of the width to the height of the bounding rectangle. Ideally the ratio of the width to the height of the bounding rectangle should be 1.
+  // double max_circular_distortion_; //!< This is a parameter related to the circular distortion of the detected blobs. It is the maximum allowable distortion of a bounding box around the detected blob, calculated as the area of the blob divided by pi times half the height or half the width of the bounding rectangle.
+  // unsigned roi_border_thickness_; //!< This is the thickness of the boarder (in pixels) around the predicted area of the LEDs in the image that defines the region of interest for image processing and detection of the LEDs.
 
 
 private:
@@ -99,7 +106,7 @@ private:
    * The unit vectors are stored in #image_vectors_.
    *
    */
-  void calculateImageVectors();
+  // void calculateImageVectors();
 
   /**
    * Calculates the Squared reprojection error between the image points and the back-projected object points.
@@ -113,8 +120,8 @@ private:
    * \return the squared reprojection error
    *
    */
-  double calculateSquaredReprojectionErrorAndCertainty(const List2DPoints & image_pts, const List2DPoints & object_pts,
-                                                       double & certainty);
+  // double calculateSquaredReprojectionErrorAndCertainty(const List2DPoints & image_pts, const List2DPoints & object_pts,
+  //                                                      double & certainty);
 
   /**
    * Calculates the LED and image detection correspondences from the initialisation histogram.
@@ -126,7 +133,7 @@ private:
    * \see initialise
    *
    */
-  VectorXuPairs correspondencesFromHistogram(MatrixXYu & histogram);
+  // VectorXuPairs correspondencesFromHistogram(MatrixXYu & histogram);
 
   /**
    * Calculates the minimum distances between two sets of 2D points and their pairs.
@@ -144,8 +151,8 @@ private:
    * \note The indexes returned in the matrix of point pairs are stores with one-based counting.
    *
    */
-  VectorXuPairs calculateMinDistancesAndPairs(const List2DPoints & points_a, const List2DPoints & points_b,
-                                              Eigen::VectorXd & min_distances);
+  // VectorXuPairs calculateMinDistancesAndPairs(const List2DPoints & points_a, const List2DPoints & points_b,
+  //                                             Eigen::VectorXd & min_distances);
 
   /**
    * Calculates the squared distance between two points.
@@ -156,8 +163,8 @@ private:
    * \returns the squared distance between point \a p1 and point \a p2
    *
    */
-  template<typename DerivedA, typename DerivedB>
-    double squareDist(const Eigen::MatrixBase<DerivedA>& p1, const Eigen::MatrixBase<DerivedB>& p2);
+  // template<typename DerivedA, typename DerivedB>
+  //   double squareDist(const Eigen::MatrixBase<DerivedA>& p1, const Eigen::MatrixBase<DerivedB>& p2);
 
   /**
    * Checks whether a matrix contains only finite numbers.
@@ -169,8 +176,8 @@ private:
    *    - \b false if the matrix contains complex or non-finite numbers, e.g. NaN
    *
    */
-  template<typename Derived>
-    bool isFinite(const Eigen::MatrixBase<Derived>& x);
+  // template<typename Derived>
+  //   bool isFinite(const Eigen::MatrixBase<Derived>& x);
 
   /**
    * Computes the transformation between two sets of points.
@@ -189,7 +196,7 @@ private:
    * \f$
    *
    */
-  Eigen::Matrix4d computeTransformation(const MatrixXYd & object_points, const MatrixXYd & reprojected_points);
+  // Eigen::Matrix4d computeTransformation(const MatrixXYd & object_points, const MatrixXYd & reprojected_points);
 
   /**
    * Computes the Jacobian of the projection from points in the object-fixed coordinate frame to the camera image plane.
@@ -219,8 +226,8 @@ private:
    * \returns [2x6] Jacobian matrix
    *
    */
-  Matrix2x6d computeJacobian(const Eigen::Matrix4d & T_c_o, const Eigen::Vector4d & world_points,
-                             const Eigen::Vector2d & focal_lengths);
+  Eigen::Matrix<double, 2, 6> computeJacobian(const Eigen::Matrix4d & T_c_o, const Eigen::Vector4d & world_points,
+                                              const Eigen::Vector2d & focal_lengths);
 
   /**
    * Computes the exponential map from a twist to a homogeneous transformation matrix.
@@ -257,7 +264,7 @@ private:
    * \see logarithmMap, skewSymmetricMatrix
    *
    */
-  Eigen::Matrix4d exponentialMap(const Vector6d & twist);
+  Eigen::Matrix4d exponentialMap(const Eigen::Matrix<double, 6, 1> & twist);
 
   /**
    * Computes the logarithm map from a homogeneous transformation matrix to twist coordinates.
@@ -299,7 +306,7 @@ private:
    * \see exponentialMap, skewSymmetricMatrix
    *
    */
-  Vector6d logarithmMap(const Eigen::Matrix4d & trans);
+  // Vector6d logarithmMap(const Eigen::Matrix4d & trans);
 
   /**
    * Creates a skew symmetric matrix from the a vector of length 3.
@@ -338,7 +345,7 @@ public:
    */
   PoseEstimator();
 
-  void augmentImage(cv::Mat &image);
+  //void augmentImage(cv::Mat &image);
 
   /**
    * Sets the positions of the markers on the object.
@@ -348,7 +355,7 @@ public:
    * \see object_points
    *
    */
-  void setMarkerPositions(List4DPoints positions_of_markers_on_object);
+  void setMarkerPositions(Eigen::Matrix<Eigen::Vector4d, Eigen::Dynamic, 1> positions_of_markers_on_object);
 
   /**
    * Returns the positions of the markers on the object in the object-fixed coordinate frame
@@ -358,12 +365,12 @@ public:
    * \see object_points
    *
    */
-  List4DPoints getMarkerPositions();
+  Eigen::Matrix<Eigen::Vector4d, Eigen::Dynamic, 1> getMarkerPositions();
 
   /**
    * Estimates the pose of the tracked object
    */
-  bool estimateBodyPose(cv::Mat image, double time_to_predict);
+  //bool estimateBodyPose(cv::Mat image, double time_to_predict);
 
   /**
    * Sets the time at which the pose will be calculated.
@@ -373,7 +380,7 @@ public:
    * \see predicted_time
    *
    */
-  void setPredictedTime(double time);
+  // void setPredictedTime(double time);
 
   /**
    * Returns the time for which the predicted pose was calculated.
@@ -383,7 +390,7 @@ public:
    * \see predicted_time
    *
    */
-  double getPredictedTime();
+  // double getPredictedTime();
 
   /**
    * Sets the predicted pose of the object.
@@ -393,7 +400,7 @@ public:
    *
    * \see predicted_pose predicted_time
    */
-  void setPredictedPose(const Eigen::Matrix4d & pose, double time);
+  void setPredictedPose(const Eigen::Matrix4d & pose/*, double time*/);
 
   /**
    * Returns the predicted pose of the object.
@@ -413,7 +420,7 @@ public:
    * \see covariance
    *
    */
-  Matrix6d getPoseCovariance();
+  Eigen::Matrix<double, 6, 6> getPoseCovariance();
 
   /**
    * Sets the image points of the markers/LEDs that have been detected in the image.
@@ -422,7 +429,7 @@ public:
    *
    * \see image_points
    */
-  void setImagePoints(List2DPoints points);
+  void setImagePoints(Eigen::Matrix<Eigen::Vector2d, Eigen::Dynamic, 1> points);
 
   /**
    * Returns the image points of the detected LEDs/markers.
@@ -430,7 +437,7 @@ public:
    * \return vector containing the image positions of the detected LEDs/markers in the image
    *
    */
-  List2DPoints getImagePoints();
+  // List2DPoints getImagePoints();
 
   /**
    * Sets the predicted position of the LEDs/markers in the image.
@@ -440,7 +447,7 @@ public:
    * \see predictMarkerPositionsInImage
    *
    */
-  void setPredictedPixels(List2DPoints points);
+  // void setPredictedPixels(List2DPoints points);
 
   /**
    * Returns the predicted position of the LEDs/markers in the image.
@@ -450,7 +457,7 @@ public:
    * \see predictMarkerPositionsInImage
    *
    */
-  List2DPoints getPredictedPixelPositions();
+  // List2DPoints getPredictedPixelPositions();
 
   /**
    * Sets the correspondences between the LEDs/markers on the object and the image detections.
@@ -460,7 +467,7 @@ public:
    * \see correspondences
    *
    */
-  void setCorrespondences(VectorXuPairs corrs);
+  void setCorrespondences(Eigen::Matrix<unsigned, Eigen::Dynamic, 2> corrs);
 
   /**
    * Returns the correspondences between the LEDs/markers on the object and the image detections.
@@ -470,7 +477,7 @@ public:
    * \see correspondences
    *
    */
-  VectorXuPairs getCorrespondences();
+  Eigen::Matrix<unsigned, Eigen::Dynamic, 2> getCorrespondences();
 
   /**
    * Sets the back-projection pixel tolerance that is used to determine whether an LED and image detection correspondence is correct.
@@ -480,7 +487,7 @@ public:
    * \see back_projection_pixel_tolerance checkCorrespondences
    *
    */
-  void setBackProjectionPixelTolerance(double tolerance);
+  // void setBackProjectionPixelTolerance(double tolerance);
 
   /**
    * Returns the back-projection pixel tolerance that is used to determine whether an LED and image detection correspondence is correct.
@@ -490,7 +497,7 @@ public:
    * \see back_projection_pixel_tolerance checkCorrespondences
    *
    */
-  double getBackProjectionPixelTolerance();
+  // double getBackProjectionPixelTolerance();
 
   /**
    * Sets the nearest-neighbour pixel tolerance that is used to determine whether the predicted position of a marker corresponds to a detection in the image.
@@ -500,7 +507,7 @@ public:
    * \see nearest_neighbour_pixel_tolerance findCorrespondences
    *
    */
-  void setNearestNeighbourPixelTolerance(double tolerance);
+  // void setNearestNeighbourPixelTolerance(double tolerance);
 
   /**
    * Returns the nearest-neighbour pixel tolerance that is used to determine whether the predicted position of a marker corresponds to a detection in the image.
@@ -510,7 +517,7 @@ public:
    * \see nearest_neighbour_pixel_tolerance findCorrespondences
    *
    */
-  double getNearestNeighbourPixelTolerance();
+  // double getNearestNeighbourPixelTolerance();
 
   /**
    * Sets the ratio of how many of the back-projected points must be within the #back_projection_pixel_tolerance_ for a correspondence between the LEDs and the detections to be correct.
@@ -520,7 +527,7 @@ public:
    * \see certainty_threshold
    *
    */
-  void setCertaintyThreshold(double threshold);
+  // void setCertaintyThreshold(double threshold);
 
   /**
    * Returns the ratio of how many of the back-projected points must be within the #back_projection_pixel_tolerance_ for a correspondence between the LEDs and the detections to be correct.
@@ -530,7 +537,7 @@ public:
    * \see certainty_threshold
    *
    */
-  double getCertaintyThreshold();
+  // double getCertaintyThreshold();
 
   /**
    * Sets the ratio of how many correspondences must be considered to be correct for the total correspondences to be considered correct.
@@ -540,7 +547,7 @@ public:
    * \see valid_correspondence_threshold
    *
    */
-  void setValidCorrespondenceThreshold(double threshold);
+  // void setValidCorrespondenceThreshold(double threshold);
 
   /**
    * Returns the ratio of how many correspondences must be considered to be correct for the total correspondences to be considered correct.
@@ -550,7 +557,7 @@ public:
    * \see valid_correspondence_threshold
    *
    */
-  double getValidCorrespondenceThreshold();
+  // double getValidCorrespondenceThreshold();
 
   /**
    * Sets the minimum numbers of entries in the initialisation histogram before an entry could be used to determine a correspondence between the LEDs and the image detections.
@@ -560,7 +567,7 @@ public:
    * \see histogram_threshold
    *
    */
-  void setHistogramThreshold(unsigned threshold);
+  // void setHistogramThreshold(unsigned threshold);
 
   /**
    * Returns the minimum numbers of entries in the initialisation histogram before an entry could be used to determine a correspondence between the LEDs and the image detections.
@@ -570,7 +577,7 @@ public:
    * \see histogram_threshold
    *
    */
-  unsigned getHistogramThreshold();
+  // unsigned getHistogramThreshold();
 
   /**
    * Projects points onto the image plane.
@@ -672,7 +679,7 @@ public:
    * \param time_to_predict the time at which the pose is to be calculated
    *
    */
-  void predictPose(double time_to_predict);
+  // void predictPose(double time_to_predict);
 
   /**
    * Predicts the position of the markers/LEDs in the image.
@@ -690,7 +697,7 @@ public:
    * \see project2d
    *
    */
-  void predictMarkerPositionsInImage();
+  // void predictMarkerPositionsInImage();
 
   /**
    * Finds possible correspondences between detected image points and markers/LEDs on the object.
@@ -705,7 +712,7 @@ public:
    * \see predictMarkerPositionsInImage
    *
    */
-  void findCorrespondences();
+  // void findCorrespondences();
 
   /**
    * Checks whether the correspondences are valid and updates the predicted pose (#predicted_pose_) of the object if they are.
@@ -721,7 +728,7 @@ public:
    *   - \b 1 if the correspondences are valid
    *
    */
-  unsigned checkCorrespondences();
+  // unsigned checkCorrespondences();
 
   /**
    * Performs the brute-force initialisation to determine the LED/marker and image detection correspondences and the pose of the object.
@@ -746,7 +753,7 @@ public:
    *
    * \see correspondencesFromHistogram, checkCorrespondences
    */
-  unsigned initialise();
+  // unsigned initialise();
 
   /**
    * Optimises the predicted pose using a Gauss-Newton optimisation to minimise the squared reprojection error between the LEDs/markers and image detections.
@@ -770,20 +777,20 @@ public:
    * where \f$\mathbf{\Sigma}_D \in \mathbb{R}^{2 \times 2}\f$ is the covariance of the LED detections. Here \f$\mathbf{\Sigma}_D = \mathbf{I}_{2 \times 2} \cdot 1 \mathrm{\:pixel}^2 \f$.
    *
    */
-  void optimisePose();
+  void optimisePose(const unsigned max_itr = 500, const double converged = 1e-13);
 
   /**
    * Updates the time index and the past poses. I.e., the current pose and time becomes the previous pose
    * and time and the predicted pose and time becomes the current pose and time.
    *
    */
-  void updatePose();
+  // void updatePose();
 
   /**
    * Optimises the pose by minimising the reprojection error.
    *
    */
-  void optimiseAndUpdatePose(double & time_to_predict);
+  // void optimiseAndUpdatePose(double & time_to_predict);
 
   /**
    * Uses the previous poses to predict the current pose of the object and uses this prediction to calculate a region of interest in which the LED point should be found in the image.
@@ -792,13 +799,13 @@ public:
    * \param image the image in which the LEDs are to be detected
    *
    */
-  void predictWithROI(double & time_to_predict, const cv::Mat & image);
+  //void predictWithROI(double & time_to_predict, const cv::Mat & image);
 
   /**
    * Determines the correspondences using a nearest neighbour search between the predicted position of the LEDs in the image and the actual detected LEDs in the image
    *
    */
-  void findCorrespondencesAndPredictPose(double & time_to_predict);
+  // void findCorrespondencesAndPredictPose(double & time_to_predict);
 
 };
 

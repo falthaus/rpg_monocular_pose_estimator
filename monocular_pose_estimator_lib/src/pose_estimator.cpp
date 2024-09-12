@@ -31,34 +31,45 @@
 namespace monocular_pose_estimator
 {
 
+
 PoseEstimator::PoseEstimator()
 {
+  /*
   back_projection_pixel_tolerance_ = 3;
   nearest_neighbour_pixel_tolerance_ = 5;
   certainty_threshold_ = 0.75;
   valid_correspondence_threshold_ = 0.7;
 
   it_since_initialized_ = 0;
+  */
 }
 
+
+/*
 void PoseEstimator::augmentImage(cv::Mat &image)
 {
   Visualization::createVisualizationImage(image, predicted_pose_, camera_matrix_K_, camera_distortion_coeffs_,
                                           region_of_interest_, distorted_detection_centers_);
 }
+*/
 
-void PoseEstimator::setMarkerPositions(List4DPoints positions_of_markers_on_object)
+
+void PoseEstimator::setMarkerPositions(Eigen::Matrix<Eigen::Vector4d, Eigen::Dynamic, 1> positions_of_markers_on_object)
 {
   object_points_ = positions_of_markers_on_object;
-  predicted_pixel_positions_.resize(object_points_.size());
-  histogram_threshold_ = Combinations::numCombinations(object_points_.size(), 3);
+//  predicted_pixel_positions_.resize(object_points_.size());
+//  histogram_threshold_ = Combinations::numCombinations(object_points_.size(), 3);
 }
 
-List4DPoints PoseEstimator::getMarkerPositions()
+
+
+Eigen::Matrix<Eigen::Vector4d, Eigen::Dynamic, 1> PoseEstimator::getMarkerPositions()
 {
   return object_points_;
 }
 
+
+/*
 bool PoseEstimator::estimateBodyPose(cv::Mat image, double time_to_predict)
 {
   pose_updated_ = false;
@@ -145,90 +156,123 @@ bool PoseEstimator::estimateBodyPose(cv::Mat image, double time_to_predict)
 
   return pose_updated_;
 }
+*/
 
-void PoseEstimator::setPredictedPose(const Eigen::Matrix4d & pose, double time)
+
+void PoseEstimator::setPredictedPose(const Eigen::Matrix4d & pose/*, double time*/)
 {
   predicted_pose_ = pose;
-  predicted_time_ = time;
+//  predicted_time_ = time;
 
 }
+
 
 Eigen::Matrix4d PoseEstimator::getPredictedPose()
 {
   return predicted_pose_;
 }
 
-Matrix6d PoseEstimator::getPoseCovariance()
+
+
+Eigen::Matrix<double, 6, 6> PoseEstimator::getPoseCovariance()
 {
   return pose_covariance_;
 }
 
-void PoseEstimator::setImagePoints(List2DPoints points)
+
+
+void PoseEstimator::setImagePoints(Eigen::Matrix<Eigen::Vector2d, Eigen::Dynamic, 1> points)
 {
   image_points_ = points;
   PoseEstimator::calculateImageVectors();
 }
 
+
+/*
 void PoseEstimator::setPredictedPixels(List2DPoints points)
 {
   predicted_pixel_positions_ = points;
 }
+*/
 
+/*
 List2DPoints PoseEstimator::getPredictedPixelPositions()
 {
   return predicted_pixel_positions_;
 }
+*/
 
+/*
 void PoseEstimator::setBackProjectionPixelTolerance(double tolerance)
 {
   back_projection_pixel_tolerance_ = tolerance;
 }
+*/
 
+/*
 double PoseEstimator::getBackProjectionPixelTolerance()
 {
   return back_projection_pixel_tolerance_;
 }
+*/
 
+/*
 void PoseEstimator::setNearestNeighbourPixelTolerance(double tolerance)
 {
   nearest_neighbour_pixel_tolerance_ = tolerance;
 }
+*/
 
+/*
 double PoseEstimator::getNearestNeighbourPixelTolerance()
 {
   return nearest_neighbour_pixel_tolerance_;
 }
+*/
 
+/*
 void PoseEstimator::setCertaintyThreshold(double threshold)
 {
   certainty_threshold_ = threshold;
 }
+*/
 
+/*
 double PoseEstimator::getCertaintyThreshold()
 {
   return certainty_threshold_;
 }
+*/
 
+/*
 void PoseEstimator::setValidCorrespondenceThreshold(double threshold)
 {
   valid_correspondence_threshold_ = threshold;
 }
+*/
 
+/*
 double PoseEstimator::getValidCorrespondenceThreshold()
 {
   return valid_correspondence_threshold_;
 }
+*/
 
+/*
 void PoseEstimator::setHistogramThreshold(unsigned threshold)
 {
   histogram_threshold_ = threshold;
 }
+*/
 
+/*
 unsigned PoseEstimator::getHistogramThreshold()
 {
   return histogram_threshold_;
 }
+*/
 
+/*
 void PoseEstimator::predictPose(double time_to_predict)
 {
   predicted_time_ = time_to_predict;
@@ -242,21 +286,25 @@ void PoseEstimator::predictPose(double time_to_predict)
   // predict new pose
   predicted_pose_ = current_pose_ * exponentialMap(delta_hat);
 }
+*/
 
+/*
 List2DPoints PoseEstimator::getImagePoints()
 {
   return image_points_;
 }
+*/
+
 
 inline Eigen::Vector2d PoseEstimator::project2d(Eigen::Vector4d point, Eigen::Matrix4d transform)
 {
   // convert matrix interna
-  Matrix3x4d camera_matrix;
+  Eigen::Matrix<double, 3, 4> camera_matrix;
   for (int i=0; i<3; i++)
   {
     for (int j=0; j<3; j++)
     {
-      camera_matrix(i, j) = camera_matrix_K_.at<double>(i, j);
+      camera_matrix(i, j) = camera_matrix_K_(i, j);
     }
     camera_matrix(i, 3) = 0.0;
   }
@@ -267,6 +315,8 @@ inline Eigen::Vector2d PoseEstimator::project2d(Eigen::Vector4d point, Eigen::Ma
   return temp.head<2>();
 }
 
+
+/*
 void PoseEstimator::predictMarkerPositionsInImage()
 {
   for (unsigned i = 0; i < object_points_.size(); ++i)
@@ -274,16 +324,21 @@ void PoseEstimator::predictMarkerPositionsInImage()
     predicted_pixel_positions_(i) = project2d((Eigen::Vector4d)object_points_(i), predicted_pose_);
   }
 }
+*/
 
-void PoseEstimator::setCorrespondences(VectorXuPairs corrs)
+
+void PoseEstimator::setCorrespondences(Eigen::Matrix<unsigned, Eigen::Dynamic, 2> corrs)
 {
   correspondences_ = corrs;
 }
 
-VectorXuPairs PoseEstimator::getCorrespondences()
+
+
+Eigen::Matrix<unsigned, Eigen::Dynamic, 2> PoseEstimator::getCorrespondences()
 {
   return correspondences_;
 }
+
 
 void PoseEstimator::calculateImageVectors()
 {
@@ -293,13 +348,15 @@ void PoseEstimator::calculateImageVectors()
 
   for (unsigned i = 0; i < num_image_points; ++i)
   {
-    single_vector(0) = (image_points_(i)(0) - camera_matrix_K_.at<double>(0, 2)) / camera_matrix_K_.at<double>(0, 0);
-    single_vector(1) = (image_points_(i)(1) - camera_matrix_K_.at<double>(1, 2)) / camera_matrix_K_.at<double>(1, 1);
+    single_vector(0) = (image_points_(i)(0) - camera_matrix_K_(0, 2)) / camera_matrix_K_(0, 0);
+    single_vector(1) = (image_points_(i)(1) - camera_matrix_K_(1, 2)) / camera_matrix_K_(1, 1);
     single_vector(2) = 1;
     image_vectors_(i) = single_vector / single_vector.norm();
   }
 }
 
+
+/*
 double PoseEstimator::calculateSquaredReprojectionErrorAndCertainty(const List2DPoints & image_pts,
                                                                     const List2DPoints & object_pts, double & certainty)
 {
@@ -340,7 +397,9 @@ double PoseEstimator::calculateSquaredReprojectionErrorAndCertainty(const List2D
 
   return squared_error;
 }
+*/
 
+/*
 VectorXuPairs PoseEstimator::correspondencesFromHistogram(MatrixXYu & histogram)
 {
   //unsigned threshold = 4;
@@ -368,7 +427,9 @@ VectorXuPairs PoseEstimator::correspondencesFromHistogram(MatrixXYu & histogram)
 
   return correspondences;
 }
+*/
 
+/*
 void PoseEstimator::findCorrespondences()
 {
   Eigen::VectorXd min_distances;
@@ -390,7 +451,9 @@ void PoseEstimator::findCorrespondences()
 
   correspondences_ = temp_corrs;
 }
+*/
 
+/*
 unsigned PoseEstimator::checkCorrespondences()
 {
   bool valid_correspondences = 0;
@@ -540,7 +603,9 @@ unsigned PoseEstimator::checkCorrespondences()
 
   return valid_correspondences;
 }
+*/
 
+/*
 unsigned PoseEstimator::initialise()
 {
   // Combinations of seen points
@@ -719,36 +784,38 @@ unsigned PoseEstimator::initialise()
   }
 
 }
+*/
 
+/*
 void PoseEstimator::setPredictedTime(double time)
 {
   predicted_time_ = time;
 }
+*/
 
+/*
 double PoseEstimator::getPredictedTime()
 {
   return predicted_time_;
 }
+*/
 
-void PoseEstimator::optimisePose()
+void PoseEstimator::optimisePose(const unsigned max_itr, const double converged)
 {
   // Using a Gauss-Newton Optimisation
 
-  const double converged = 1e-13;
-  const unsigned max_itr = 500;
-
   Eigen::Matrix4d T_new;
   Eigen::Matrix4d T_old = predicted_pose_;
-  Matrix6d A;
-  Vector6d b;
+  Eigen::Matrix<double, 6, 6> A;
+  Eigen::Matrix<double, 6, 1> b;
   Eigen::Matrix2d R; // Covariance matrix of the image points. Assume the image points points are independent
   R.setIdentity(); // Assume the variance is one pixel in u and v.
-  Matrix2x6d J;
+  Eigen::Matrix<double, 2, 6> J;
   Eigen::Vector2d focal_lengths;
-  focal_lengths(0) = camera_matrix_K_.at<double>(0, 0);
-  focal_lengths(1) = camera_matrix_K_.at<double>(1, 1);
+  focal_lengths(0) = camera_matrix_K_(0, 0);
+  focal_lengths(1) = camera_matrix_K_(1, 1);
 
-  Vector6d dT;
+  Eigen::Matrix<double, 6, 1> dT;
 
   for (unsigned i = 0; i < max_itr; ++i)
   {
@@ -791,6 +858,7 @@ void PoseEstimator::optimisePose()
 
 }
 
+/*
 void PoseEstimator::updatePose()
 {
   previous_pose_ = current_pose_;
@@ -798,7 +866,9 @@ void PoseEstimator::updatePose()
   previous_time_ = current_time_;
   current_time_ = predicted_time_;
 }
+*/
 
+/*
 void PoseEstimator::optimiseAndUpdatePose(double & time_to_predict)
 {
   optimisePose();
@@ -810,7 +880,9 @@ void PoseEstimator::optimiseAndUpdatePose(double & time_to_predict)
   updatePose();
   pose_updated_ = true;
 }
+*/
 
+/*
 void PoseEstimator::predictWithROI(double & time_to_predict, const cv::Mat & image)
 {
   if (it_since_initialized_ >= 2)
@@ -827,7 +899,9 @@ void PoseEstimator::predictWithROI(double & time_to_predict, const cv::Mat & ima
   region_of_interest_ = LEDDetector::determineROI(getPredictedPixelPositions(), image.size(), roi_border_thickness_,
                                                   camera_matrix_K_, camera_distortion_coeffs_);
 }
+*/
 
+/*
 void PoseEstimator::findCorrespondencesAndPredictPose(double & time_to_predict)
 {
   findCorrespondences();
@@ -846,19 +920,25 @@ void PoseEstimator::findCorrespondencesAndPredictPose(double & time_to_predict)
   }
 
 }
+*/
 
+/*
 template<typename DerivedA, typename DerivedB>
   double PoseEstimator::squareDist(const Eigen::MatrixBase<DerivedA>& p1, const Eigen::MatrixBase<DerivedB>& p2)
   {
     return (p1 - p2).squaredNorm();
   }
+*/
 
+/*
 template<typename Derived>
   bool PoseEstimator::isFinite(const Eigen::MatrixBase<Derived>& x)
   {
     return ((x - x).array() == (x - x).array()).all();
   }
+*/
 
+/*
 VectorXuPairs PoseEstimator::calculateMinDistancesAndPairs(const List2DPoints & points_a, const List2DPoints & points_b,
                                                            Eigen::VectorXd & min_distances)
 {
@@ -904,7 +984,9 @@ VectorXuPairs PoseEstimator::calculateMinDistancesAndPairs(const List2DPoints & 
 
   return pairs;
 }
+*/
 
+/*
 Eigen::Matrix4d PoseEstimator::computeTransformation(const MatrixXYd & object_points,
                                                      const MatrixXYd & reprojected_points)
 {
@@ -928,9 +1010,11 @@ Eigen::Matrix4d PoseEstimator::computeTransformation(const MatrixXYd & object_po
   transform.block<3, 1>(0, 3) = t;
   return transform;
 }
+*/
 
-Matrix2x6d PoseEstimator::computeJacobian(const Eigen::Matrix4d & T_c_o, const Eigen::Vector4d & world_points,
-                                          const Eigen::Vector2d & focal_lengths)
+
+Eigen::Matrix<double, 2, 6> PoseEstimator::computeJacobian(const Eigen::Matrix4d & T_c_o, const Eigen::Vector4d & world_points,
+                                                           const Eigen::Vector2d & focal_lengths)
 {
   // This Jacobian is calculated according to equation A.14 from the the PhD thesis of Ethan Eade
   // See http://ethaneade.com/
@@ -941,7 +1025,7 @@ Matrix2x6d PoseEstimator::computeJacobian(const Eigen::Matrix4d & T_c_o, const E
   double y = point_camera_frame(1);
   double z = point_camera_frame(2);
   double z_2 = z * z;
-  Matrix2x6d jacobian;
+  Eigen::Matrix<double, 2, 6> jacobian;
   jacobian(0, 0) = 1 / z * focal_lengths(0);
   jacobian(0, 1) = 0;
   jacobian(0, 2) = -x / z_2 * focal_lengths(0);
@@ -959,7 +1043,9 @@ Matrix2x6d PoseEstimator::computeJacobian(const Eigen::Matrix4d & T_c_o, const E
   return jacobian;
 }
 
-Eigen::Matrix4d PoseEstimator::exponentialMap(const Vector6d & twist)
+
+
+Eigen::Matrix4d PoseEstimator::exponentialMap(const Eigen::Matrix<double, 6, 1> & twist)
 {
   Eigen::Vector3d upsilon = twist.head<3>();
   Eigen::Vector3d omega = twist.tail<3>();
@@ -993,6 +1079,8 @@ Eigen::Matrix4d PoseEstimator::exponentialMap(const Vector6d & twist)
   return transform;
 }
 
+
+/*
 Vector6d PoseEstimator::logarithmMap(const Eigen::Matrix4d & trans)
 {
   Vector6d xi;
@@ -1062,6 +1150,8 @@ Vector6d PoseEstimator::logarithmMap(const Eigen::Matrix4d & trans)
 
   return xi;
 }
+*/
+
 
 Eigen::Matrix3d PoseEstimator::skewSymmetricMatrix(const Eigen::Vector3d w)
 {
@@ -1069,6 +1159,8 @@ Eigen::Matrix3d PoseEstimator::skewSymmetricMatrix(const Eigen::Vector3d w)
   Omega << 0, -w(2), w(1), w(2), 0, -w(0), -w(1), w(0), 0;
   return Omega;
 }
+
+
 
 double PoseEstimator::norm_max(const Eigen::VectorXd & v)
 {
@@ -1083,6 +1175,7 @@ double PoseEstimator::norm_max(const Eigen::VectorXd & v)
   }
   return max;
 }
+
 
 } // namespace
 
