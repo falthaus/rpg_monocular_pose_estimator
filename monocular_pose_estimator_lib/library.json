@@ -1,0 +1,15 @@
+{
+    "name": "monocular_pose_estimator_lib",
+    "version": "0.0.1",
+    "build":
+    {
+        "srcFilter":
+        [
+            "-<combinations.cpp>",
+            "-<led_detector.cpp>",
+            "-<visualization.cpp>",
+            "+<p3p.cpp>",
+            "+<pose_estimator.cpp>"
+        ]
+    }
+}
