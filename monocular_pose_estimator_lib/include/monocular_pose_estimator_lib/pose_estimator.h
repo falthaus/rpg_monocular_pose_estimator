@@ -106,7 +106,7 @@ private:
    * The unit vectors are stored in #image_vectors_.
    *
    */
-  // void calculateImageVectors();
+  void calculateImageVectors();
 
   /**
    * Calculates the Squared reprojection error between the image points and the back-projected object points.
