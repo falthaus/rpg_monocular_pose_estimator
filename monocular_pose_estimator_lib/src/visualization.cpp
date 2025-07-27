@@ -28,7 +28,7 @@
 
 #include "monocular_pose_estimator_lib/visualization.h"
 #include <stdio.h>
-#include "ros/ros.h"
+
 
 namespace monocular_pose_estimator
 {
