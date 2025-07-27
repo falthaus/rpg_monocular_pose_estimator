@@ -89,7 +89,7 @@ void Visualization::createVisualizationImage(cv::Mat &image, Eigen::Matrix4d tra
   projectOrientationVectorsOnImage(image, points_to_project, camera_matrix_K, camera_distortion_coeffs);
 
   // Draw a circle around the detected LED
-  for (int i = 0; i < distorted_detection_centers.size(); i++)
+  for (unsigned int i = 0; i < distorted_detection_centers.size(); i++)
   {
     cv::circle(image, distorted_detection_centers[i], 10, CV_RGB(255, 0, 0), 2);
   }

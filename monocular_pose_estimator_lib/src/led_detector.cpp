@@ -66,7 +66,7 @@ void LEDDetector::findLeds(const cv::Mat &image, cv::Rect ROI, const int &thresh
   {
     double area = cv::contourArea(contours[i]); // Blob area
     cv::Rect rect = cv::boundingRect(contours[i]); // Bounding box
-    double radius = (rect.width + rect.height) / 4; // Average radius
+    //double radius = (rect.width + rect.height) / 4; // Average radius
 
     cv::Moments mu;
     mu = cv::moments(contours[i], false);
