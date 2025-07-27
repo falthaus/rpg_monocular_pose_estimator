@@ -730,12 +730,11 @@ double PoseEstimator::getPredictedTime()
   return predicted_time_;
 }
 
-void PoseEstimator::optimisePose()
+void PoseEstimator::optimisePose(unsigned int max_iter)
 {
   // Using a Gauss-Newton Optimisation
 
   const double converged = 1e-13;
-  const unsigned max_itr = 500;
 
   Eigen::Matrix4d T_new;
   Eigen::Matrix4d T_old = predicted_pose_;
@@ -750,7 +749,7 @@ void PoseEstimator::optimisePose()
 
   Vector6d dT;
 
-  for (unsigned i = 0; i < max_itr; ++i)
+  for (unsigned i = 0; i < max_iter; ++i)
   {
     A.setZero();
     b.setZero();

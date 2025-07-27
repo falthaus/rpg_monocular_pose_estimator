@@ -769,8 +769,10 @@ public:
    * \f]
    * where \f$\mathbf{\Sigma}_D \in \mathbb{R}^{2 \times 2}\f$ is the covariance of the LED detections. Here \f$\mathbf{\Sigma}_D = \mathbf{I}_{2 \times 2} \cdot 1 \mathrm{\:pixel}^2 \f$.
    *
+   * \param max_iter the maximum number of iterations to perform during the optimization
+   *
    */
-  void optimisePose();
+  void optimisePose(unsigned int max_iter = 500);
 
   /**
    * Updates the time index and the past poses. I.e., the current pose and time becomes the previous pose
