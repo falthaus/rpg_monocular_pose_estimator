@@ -54,7 +54,7 @@ void LEDDetector::findLeds(const cv::Mat &image, cv::Rect ROI, const int &thresh
 
   // Find all contours
   std::vector<std::vector<cv::Point> > contours;
-  cv::findContours(gaussian_image.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+  cv::findContours(gaussian_image.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 
   unsigned numPoints = 0; // Counter for the number of detected LEDs
 
